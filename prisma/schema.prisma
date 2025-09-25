@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+ 
+  
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model categorias {
+  id_categoria   Int        @id @default(autoincrement())
+  nome_categoria String     @db.VarChar(100)
+  produtos       produtos[]
+}
+
+model item_vendas {
+  id_item_vendas      Int       @id @default(autoincrement())
+  quantidade          Int
+  preco_unitario      Decimal   @db.Decimal(10, 2)
+  valor_total_produto Decimal?  @db.Decimal(10, 2)
+  id_venda            Int?
+  id_produto          Int?
+  produtos            produtos? @relation(fields: [id_produto], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  vendas              vendas?   @relation(fields: [id_venda], references: [id_venda], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model produtos {
+  id           Int           @id @default(autoincrement())
+  nome         String        @db.VarChar(255)
+  tamanho      String?       @db.VarChar(50)
+  cor          String?       @db.VarChar(50)
+  preco        Decimal       @db.Decimal(10, 2)
+  estoque      Int           @default(0)
+  id_categoria Int?
+  item_vendas  item_vendas[]
+  categorias   categorias?   @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model usuarios {
+  id_usuario    Int      @id @default(autoincrement())
+  nome          String   @db.VarChar(255)
+  cargo         String?  @db.VarChar(100)
+  cpf           String   @unique @db.VarChar(14)
+  email         String   @unique @db.VarChar(255)
+  senha         String   @db.VarChar(255)
+  data_cadastro DateTime @default(now()) @db.Timestamp(6)
+  ativo         Boolean  @default(true)
+  vendas        vendas[]
+}
+
+model vendas {
+  id_venda    Int           @id @default(autoincrement())
+  data_venda  DateTime?     @default(now()) @db.Timestamp(6)
+  valor_total Decimal?      @db.Decimal(10, 2)
+  forma_pg    String?       @db.VarChar(50)
+  id_usuario  Int?
+  item_vendas item_vendas[]
+  usuarios    usuarios?     @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+}
